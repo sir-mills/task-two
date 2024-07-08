@@ -111,7 +111,7 @@ export const createOrg = async (req: Request, res: Response) => {
   }
 };
 
-export const addUserToOrganisation = async (req: Request, res: Response) => {
+export const addUserToOrg = async (req: Request, res: Response) => {
   try {
     const { orgId } = req.params;
     const { userId } = req.body;
@@ -138,7 +138,7 @@ export const addUserToOrganisation = async (req: Request, res: Response) => {
       });
     }
 
-    await prisma.organisation.update({
+    await prisma.org.update({
       where: { id: orgId },
       data: {
         users: {
