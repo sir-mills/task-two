@@ -3,10 +3,10 @@ const prisma = new PrismaClient();
 export const getUserById = async (req, res) => {
     try {
         const { id } = req.params;
-        const userId = req.user.userId;
+        const requestingUserId = req.user?.userId;
         const user = await prisma.user.findUnique({
             where: { id },
-            include: { orgs: true },
+            include: { orgs: true }, // Include orgs to check access
         });
         if (!user) {
             return res.status(404).json({
@@ -15,9 +15,9 @@ export const getUserById = async (req, res) => {
                 statusCode: 404,
             });
         }
-        //will come backfor this logic
-        const hasAccess = user.id === userId ||
-            user.orgs.some((org) => org.users.some((u) => u.id === userId));
+        // Check if the requesting user has access
+        const hasAccess = user.id === requestingUserId ||
+            user.orgs.some((org) => org.users.some((u) => u.id === requestingUserId));
         if (!hasAccess) {
             return res.status(403).json({
                 status: "Forbidden",
@@ -28,13 +28,7 @@ export const getUserById = async (req, res) => {
         res.status(200).json({
             status: "success",
             message: "User retrieved successfully",
-            data: {
-                userId: user.id,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                email: user.email,
-                phone: user.phone,
-            },
+            data: { user },
         });
     }
     catch (error) {

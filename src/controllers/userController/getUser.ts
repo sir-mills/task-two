@@ -1,16 +1,18 @@
 import { Request, Response } from "express";
+import { JwtPayload } from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
+import { CustomRequest } from "../../middleware/auth";
 
 const prisma = new PrismaClient();
 
-export const getUserById = async (req: Request, res: Response) => {
+export const getUserById = async (req: CustomRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const userId = (req as any).user.userId;
+    const requestingUserId = req.user?.userId;
 
     const user = await prisma.user.findUnique({
       where: { id },
-      include: { orgs: true },
+      include: { orgs: true }, // Include orgs to check access
     });
 
     if (!user) {
@@ -21,10 +23,12 @@ export const getUserById = async (req: Request, res: Response) => {
       });
     }
 
-    //will come backfor this logic
+    // Check if the requesting user has access
     const hasAccess =
-      user.id === userId ||
-      user.orgs.some((org: any) => org.users.some((u: any) => u.id === userId));
+      user.id === requestingUserId ||
+      user.orgs.some((org: any) =>
+        org.users.some((u: any) => u.id === requestingUserId)
+      );
 
     if (!hasAccess) {
       return res.status(403).json({
@@ -37,13 +41,7 @@ export const getUserById = async (req: Request, res: Response) => {
     res.status(200).json({
       status: "success",
       message: "User retrieved successfully",
-      data: {
-        userId: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phone: user.phone,
-      },
+      data: { user },
     });
   } catch (error) {
     res

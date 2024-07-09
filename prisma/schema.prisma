@@ -6,25 +6,27 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 model User {
-  id        String   @id @default(uuid())
-  firstName String
-  lastName  String
-  email     String   @unique
-  password  String
-  phone     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  orgs Org[]
-  
+  id          String   @id @default(uuid())
+  firstName   String
+  lastName    String
+  email       String   @unique
+  password    String
+  phone       String?
+  createdOrgs Org[]    @relation("CreatedBy")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  orgs        Org[]    @relation("UserOrgs")
 }
 
 model Org {
-  id          String @id @default(uuid())
+  id          String   @id @default(uuid())
   name        String
   description String?
-  users       User[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
+  users       User[]   @relation("UserOrgs")
+  createdBy   User     @relation("CreatedBy", fields: [createdById], references: [id])
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

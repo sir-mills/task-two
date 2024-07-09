@@ -4,16 +4,6 @@ import jwt from "jsonwebtoken";
 import User, { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
-//interface User {
-//id: string;
-//firstName: string;
-//lastName: string;
-//email: string;
-//password: string;
-//phone: string;
-//createdAt: Date;
-//updatedAt: Date;
-//}
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -55,6 +45,9 @@ export const register = async (req: Request, res: Response) => {
           create: {
             name: `${firstName} org`,
             description: "default org",
+            createdBy: {
+              connect: { email: email },
+            },
           },
         },
       },
@@ -62,7 +55,7 @@ export const register = async (req: Request, res: Response) => {
     });
 
     const token = jwt.sign({ userId: user.id }, process.env.APP_SECRET!, {
-      expiresIn: "1h",
+      expiresIn: "4h",
     });
 
     res.status(201).json({
