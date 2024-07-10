@@ -2,16 +2,6 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
-//interface User {
-//id: string;
-//firstName: string;
-//lastName: string;
-//email: string;
-//password: string;
-//phone: string;
-//createdAt: Date;
-//updatedAt: Date;
-//}
 export const register = async (req, res) => {
     try {
         const { firstName, lastName, email, phone, password } = req.body;
@@ -38,8 +28,7 @@ export const register = async (req, res) => {
             });
         }
         const hashedPassword = await bcrypt.hash(password, 5);
-        const user = await prisma.user.create;
-        ({
+        const user = await prisma.user.create({
             data: {
                 firstName,
                 lastName,
@@ -50,13 +39,16 @@ export const register = async (req, res) => {
                     create: {
                         name: `${firstName} org`,
                         description: "default org",
+                        createdBy: {
+                            connect: { email: email },
+                        },
                     },
                 },
             },
             include: { orgs: true },
         });
         const token = jwt.sign({ userId: user.id }, process.env.APP_SECRET, {
-            expiresIn: "1h",
+            expiresIn: "4h",
         });
         res.status(201).json({
             status: "success",

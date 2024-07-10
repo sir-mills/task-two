@@ -4,10 +4,6 @@ import { getUserById } from "../controllers/userController/getUser.js";
 
 const router = express.Router();
 
-router.get("/test", (req, res) => {
-  res.status(200).json({ message: "Test route working" });
-});
-
 router.get("/:id", authenticate, getUserById);
 
 export default router;

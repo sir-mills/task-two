@@ -18,6 +18,9 @@ export const createOrg = async (req: Request, res: Response) => {
       data: {
         name,
         description,
+        createdBy: {
+          connect: { id: userId },
+        },
         users: {
           connect: { id: userId },
         },
